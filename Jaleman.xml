@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+
+<item>
+<title>                  [COLOR turquoise]            BIENVENIDOS AL CINE LOS DESTERRADOS [/COLOR]</title>
+<link>http://Ignoreme</link>
+ <thumbnail></thumbnail>
+<fanart></fanart>
+</item>
+ 
+ 
+<item>
+<title>[COLOR yellow]                               MAS DE 3000 PELICULAS SOLO PARA EL DISFRUTE DELGRUPO[/COLOR]</title>
+<link>http://Ignoreme</link>
+ <thumbnail></thumbnail>
+<fanart></fanart>
+</item>
+
+
+
+
+
+
+
+
+
+<item>
+<title>[COLOR cyan]LOS DESTERRADOS VIP[/COLOR]</title>
+<link>$doregex[makelist]</link>
+<regex>
+<name>makelist</name>
+<listrepeat><![CDATA[
+<title>[makelist.param2]</title>
+<link>$doregex[makelist1]</link>
+<referer></referer>
+<thumbnail></thumbnail> 
+]]></listrepeat>
+<expres><![CDATA[a href="(.*?)"  class="box-link genero" title="(.*?)">]]></expres>
+<page>$doregex[select]</page>
+<cookieJar></cookieJar>
+</regex>
+
+<regex>
+<name>select</name>
+<expres><![CDATA[<section class="generos">(?s)(.*?)</section>]]></expres>
+<page>http://www.peliculasrey.com/</page>
+<agent></agent>
+<cookieJar></cookieJar>
+</regex>
+
+<regex>
+<name>makelist1</name>
+<listrepeat><![CDATA[
+<title>page  [makelist1.param1]</title>
+<link>$doregex[makelist2]</link>
+<referer></referer>
+<thumbnail></thumbnail> 
+]]></listrepeat>
+<expres> (.*?),</expres>
+<page>$doregex[number-pages]</page>
+<cookieJar></cookieJar>
+</regex>
+
+<regex>
+<name>makelist2</name>
+<listrepeat><![CDATA[
+<title>[makelist2.param3]</title>
+<link>$doregex[makelist3]</link>
+<referer></referer>
+ <thumbnail>$pyFunction: urllib.quote('[makelist2.param1]').replace('%3A',':').replace('%2F','/')</thumbnail> 
+]]></listrepeat>
+<expres><![CDATA[img src="(.*?)".*?<a href="(.*?)".*?\n.*?\n.*?span class="frame-title">(.*?)<]]></expres>
+<page>$doregex[sources]</page>
+<cookieJar></cookieJar>
+</regex>
+
+<regex>
+<name>makelist3</name>
+<listrepeat><![CDATA[
+<title>[COLOR orange][makelist3.param2][/COLOR]    [COLOR red][makelist3.param3][/COLOR]    [makelist3.param4]</title>
+<link>$doregex[get-link]</link>
+<referer></referer>
+<thumbnail></thumbnail> 
+]]></listrepeat>
+<expres><![CDATA[style="cursor:pointer; cursor: hand" rel="(.*?)".*?title="(.*?)".*?\n.*?\n.*?<span>(.*?)<.*?\n.*?class="q">(.*?)<]]></expres>
+<page>[makelist2.param2]</page>
+</regex>
+
+<regex>
+<name>sources</name>
+<expres><![CDATA[#$pyFunction
+def GetLSProData(page_data,Cookie_Jar,m):
+
+ import requests
+ import HTMLParser
+ import re
+ pages = '[makelist1.param1]'
+ genre = '[makelist.param1]'
+ url= genre + 'page/' + pages + '/'
+ headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux i686; rv:45.0) Gecko/20100101 Firefox/45.0', 'Referer': ''}
+ page_data = requests.get(url, headers=headers).text
+
+ page_data = HTMLParser.HTMLParser().unescape(page_data)
+
+ page_data = page_data.encode('utf8')
+
+ return page_data
+]]></expres>
+<page></page>
+</regex>
+
+<regex>
+<name>number-pages</name>
+<expres><![CDATA[#$pyFunction
+def GetLSProData(page_data,Cookie_Jar,m,url='[makelist.param1]'):
+ import requests
+ import re
+
+ headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux i686; rv:45.0) Gecko/20100101 Firefox/45.0', 'Referer': ''}
+ page_data = requests.get(url, headers=headers).text
+
+ pages= '1'
+ try:
+  pages = re.findall('gina 1 de (.*?)<', page_data)[0]
+  pages = str(pages)
+ except:
+  pass
+ if pages == '1':
+   pages = int(float(pages)) + 2
+   liste = list(range(pages))
+   return liste
+ else:
+   pages = int(float(pages)) + 2
+   liste = list(range(pages))
+   return liste
+]]></expres>
+<page></page>
+</regex>
+
+<regex>
+<name>get-link</name>
+<expres><![CDATA[#$pyFunction
+import urlresolver,requests,re
+def GetLSProData(page_data,Cookie_Jar,m):
+
+
+ url = '[makelist3.param1]'
+ if 'spruto.tv' in url:
+   headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux i686; rv:45.0) Gecko/20100101 Firefox/45.0', 'Referer': ''}
+   page_data = requests.get(url, headers=headers).text
+   mp4 = re.findall('file:"(.*?)"', page_data)[0]
+   return mp4
+ else: 
+   streamLink = urlresolver.resolve(url)
+   return streamLink
+]]></expres>
+<page></page>
+</regex>
+</item>
